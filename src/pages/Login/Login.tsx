@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import axios, { AxiosError } from "axios";
+import { useAuth } from "../../hooks/useAuth";
+import { AxiosError } from "axios";
 import {
   LoginContainer,
   LeftPanel,
@@ -13,31 +13,18 @@ import {
 import { AppButton as Button } from "../../components/Button";
 import TextInputWhit from "../../components/TextInputWith";
 import PasswordInputWhit from "../../components/PasswordInputWhit";
-import PraticaBuildingBackground from "../../components/PraticaBuildingBackground"; // ✨ RESTAURADO: Importamos o componente
+import PraticaBuildingBackground from "../../components/PraticaBuildingBackground";
 import MPS from "../../assets/MPS.svg";
+import { useNavigate } from "react-router-dom";
 
-
-/**
- * Login Component
- *
- * Implements the admin authentication flow for the Prática partners portal.
- * Layout:
- * - Left panel (blue): login form
- * - Right panel: company building background image
- *
- * Responsive:
- * - Desktop: split view (50/50)
- * - Mobile: stacked layout (form above image)
- */
 export default function Login() {
-  const navigate = useNavigate();
-
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Clear error message when user starts typing
   useEffect(() => {
     if (error) setError("");
   }, [email, password]);
@@ -48,20 +35,16 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/auth/login`,
-        { email, password }
-      );
+      await signIn({ email, password });
+      setEmail("");
+      setPassword("");
 
-      if (response.data.token) {
-        localStorage.setItem("authToken", response.data.token);
-        navigate("/technicians");
-      }
-    } catch (error) {
-      const axiosError = error as AxiosError<{ message?: string }>;
+      navigate("/technicians");
+    } catch (err) {
+      const axiosError = err as AxiosError<{ message?: string }>;
       const errorMessage =
         axiosError.response?.data?.message ||
-        "Invalid credentials. Please try again.";
+        "Credenciais inválidas. Tente novamente.";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -70,7 +53,6 @@ export default function Login() {
 
   return (
     <LoginContainer>
-      {/* Left Panel - Form */}
       <LeftPanel>
         <FormWrapper>
           <LogoWrapper>
@@ -78,7 +60,6 @@ export default function Login() {
           </LogoWrapper>
 
           <form onSubmit={handleSubmit}>
-            {/* Email Field usando TextInputWhit */}
             <TextInputWhit
               id="email"
               label="Login"
@@ -90,7 +71,6 @@ export default function Login() {
               disabled={loading}
             />
 
-            {/* Password Field usando PasswordInputWhit */}
             <PasswordInputWhit
               id="password"
               label="Senha"
@@ -101,10 +81,8 @@ export default function Login() {
               disabled={loading}
             />
 
-            {/* Error Message */}
             {error && <ErrorMessage>{error}</ErrorMessage>}
 
-            {/* Submit Button */}
             <Button
               type="submit"
               label={loading ? "ENTRANDO..." : "ENTRAR"}
@@ -113,8 +91,6 @@ export default function Login() {
           </form>
         </FormWrapper>
       </LeftPanel>
-
-      {/* Right Panel - Background Image usando PraticaBuildingBackground */}
       <RightPanel>
         <PraticaBuildingBackground />
       </RightPanel>

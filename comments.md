@@ -1,29 +1,30 @@
-##📝 Comentários Técnicos – Frontend (27/03)
-
+##📝 Comentários Técnicos – Frontend (Até 29/03)
 📌 Progresso do Desafio
-[x] Setup Inicial: Repositório pratica-challenge-frontend criado e configurado com Vite + React + TypeScript.
-[x] Estrutura de Pastas: Organização modular definida (api, components, pages, contexts).
-[x] Desenvolvimento da Tela de Login:
-[x] Implementação do layout Split Screen fiel ao design do Adobe XD.
-[x] Resolução do problema de transparência no border-radius do painel lateral.
-[x] Componentização da imagem de fachada (PraticaBuildingBackground) com object-fit: cover.
+[x] Setup Inicial: Repositório configurado com Vite + React + TypeScript.
+[x] Estrutura de Pastas: Organização modular estabelecida (api, components, pages, contexts, hooks).
+[x] Desenvolvimento da Tela de Login: Layout Split Screen fiel ao Adobe XD.
+[x] Autenticação & Estado:
+[x] Integração com API via Axios.
+[x] Implementação de Context API (AuthContext) para gestão global de token.
+[x] Persistência de login via localStorage.
 
-🛠️ Decisões Técnicas
-Styled Components: Escolhido para garantir o encapsulamento dos estilos e facilitar a manutenção de componentes dinâmicos.
-Camadas de Z-Index: Utilizado para garantir que o painel de formulário sobreponha a imagem de fundo, permitindo que a curvatura lateral revele a fachada sem exibir espaços vazios.
-Refatoração de Estilos: Remoção de estilos redundantes (Label, FormGroup) do arquivo principal de login, movendo-os para dentro dos componentes reutilizáveis de Input para manter o código limpo (Clean Code).
-🎨 Detalhes de Implementação (UI/UX)
-Fidelidade ao Designer:
-Painel Esquerdo: width: 660px, cor #004687, borda direita de 30px.
-Painel Direito: width: 746px, borda lateral #707070.
-Responsividade: Implementação de media queries para ocultar o painel de imagem em dispositivos móveis (abaixo de 900px) e ajustar o formulário para tela cheia.
-🚀 Próximos Passos
 
- 28-03
-[ ] Integração com a API de autenticação via Axios.
-[ ] Tratamento de estados de erro e carregamento (loading) no formulário.
-[ ] Implementar Context API para gerenciamento do estado global de autenticação.
-[ ] Criar Rotas Privadas para proteger a listagem de técnicos.
-[ ] Desenvolver a tela de listagem e o CRUD de Técnicos.
-[ ] Adicionar máscaras de entrada (Telefone/CEP) nos formulários de cadastro.
+##🛠️ Decisões Técnicas
+* Arquitetura de Rotas: Implementação de BrowserRouter com PrivateRoute utilizando o componente <Outlet /> do React Router v6. Essa estratégia permite centralizar a lógica de proteção em um único "wrapper", facilitando a escalabilidade caso novas rotas privadas sejam adicionadas.
+* Segurança de Dados: Integração com backend utilizando bcrypt para validação de hash de senhas. Isso garante que as credenciais nunca sejam comparadas em texto puro, elevando o padrão de segurança do sistema.
+* Injeção de Contexto (Context API): Configuração do AuthProvider no root da aplicação (main.tsx). Essa decisão garante que o estado de autenticação (signed, loading) e o método signIn estejam acessíveis em todos os nós da árvore de componentes via custom hook.
+* Refatoração UI & Clean Code: Centralização de componentes de entrada de dados (TextInput, PasswordInput) para reaproveitamento sistemático. Os componentes foram desacoplados da lógica de negócio da página de Login, permitindo sua reutilização direta nos formulários de técnicos (CRUD).
+* Gerenciamento de Instâncias: Utilização do Axios para criar uma instância base da API, permitindo a configuração de interceptors ou headers globais (como o Authorization: Bearer token) de forma simplificada após o login.
 
+
+###🎨 Detalhes de Implementação (UI/UX)
+Fidelidade ao Design: Painéis rigorosamente alinhados com as medidas do Adobe XD (660px / 746px).
+Tratamento de Erros: Feedback visual de "Credenciais Inválidas" integrado ao catch das requisições Axios.
+Responsividade: Layout adaptável para dispositivos móveis com ocultação inteligente do painel de fachada.
+
+###🚀 Próximos Passos
+[x] Criar Rotas Privadas para proteger a listagem de técnicos.
+[ ] Desenvolvimento da Tela de Listagem (Técnicos): Layout da tabela e filtros.
+[ ] CRUD de Técnicos: Implementar as funcionalidades de Criar, Editar e Excluir.
+[ ] Máscaras de Entrada: Adicionar máscaras de Telefone e CEP nos formulários de técnicos.
+[ ] Consumo de API: Listagem dinâmica de técnicos vinda do banco de dados pratica_test.
