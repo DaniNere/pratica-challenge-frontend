@@ -1,12 +1,15 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import { PrivateRoute } from "./PrivateRoute";
+import Technicians from "../pages/Technicians/Technicians";
 import Login from "../pages/Login/Login";
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      {/* rota coringa de fallback */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route element={<PrivateRoute />}>
+        <Route path="/technicians" element={<Technicians />} />
+      </Route>
     </Routes>
   );
 }
