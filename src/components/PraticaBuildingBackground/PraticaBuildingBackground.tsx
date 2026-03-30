@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import fachada from "../assets/pratica-fachada.png"; 
+import fachada from "../../assets/pratica-fachada.png"; 
 
 const BackgroundImage = styled.img`
   width: 100%;
