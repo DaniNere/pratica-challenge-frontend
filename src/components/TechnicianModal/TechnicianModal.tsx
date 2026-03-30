@@ -1,23 +1,12 @@
 import React, { useEffect, useState } from "react";
 import * as S from "./TechnicianModal.styles";
 import { AppButton } from "../../components/Button/Button";
-
-interface Technician {
-  nome: string;
-  email: string;
-  telefone: string;
-  cep: string;
-  cidade: string;
-  uf: string;
-}
-
-interface ModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: (message: string) => void;
-  mode: "add" | "edit";
-  initialData?: Technician | null;
-}
+import { TechnicianService } from "../../services/TechnicianService";
+import type {
+  CreateTechnicianPayload,
+  ModalProps,
+  UpdateTechnicianPayload,
+} from "../../types/technician";
 
 export const TechnicianModal: React.FC<ModalProps> = ({
   isOpen,
@@ -26,28 +15,39 @@ export const TechnicianModal: React.FC<ModalProps> = ({
   mode,
   initialData,
 }) => {
-  const [formData, setFormData] = useState<Technician>({
-    nome: "",
+  const [formData, setFormData] = useState<CreateTechnicianPayload>({
+    fullName: "",
     email: "",
-    telefone: "",
-    cep: "",
-    cidade: "",
-    uf: "",
+    phone: "",
+    zipCode: "",
+    city: "",
+    state: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (mode === "edit" && initialData) {
-      setFormData(initialData);
-    } else {
+    if (isOpen && mode === "edit" && initialData) {
       setFormData({
-        nome: "",
+        fullName: initialData.fullName,
+        email: initialData.email,
+        phone: initialData.phone,
+        zipCode: initialData.zipCode,
+        city: initialData.city,
+        state: initialData.state,
+      });
+    } else if (isOpen && mode === "add") {
+      setFormData({
+        fullName: "",
         email: "",
-        telefone: "",
-        cep: "",
-        cidade: "",
-        uf: "",
+        phone: "",
+        zipCode: "",
+        city: "",
+        state: "",
       });
     }
+    setError(null);
+    setIsLoading(false);
   }, [isOpen, mode, initialData]);
 
   const formatCEP = (value: string) =>
@@ -62,24 +62,43 @@ export const TechnicianModal: React.FC<ModalProps> = ({
       .replace(/(\d{5})(\d)/, "$1-$2")
       .substring(0, 15);
 
-  if (!isOpen) return null;
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let formattedValue = value;
-    if (name === "cep") formattedValue = formatCEP(value);
-    else if (name === "telefone") formattedValue = formatPhone(value);
+    if (name === "zipCode") formattedValue = formatCEP(value);
+    else if (name === "phone") formattedValue = formatPhone(value);
     setFormData((prev) => ({ ...prev, [name]: formattedValue }));
   };
 
-  const handleSave = () => {
-    console.log("Salvando dados:", formData);
-    const successMsg =
-      mode === "add"
-        ? "TÉCNICO ADICIONADO COM SUCESSO!"
-        : "TÉCNICO EDITADO COM SUCESSO!";
-    onSuccess(successMsg);
+  const handleSave = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      if (mode === "add") {
+        await TechnicianService.createTechnician(formData);
+        onSuccess("TÉCNICO ADICIONADO COM SUCESSO!");
+      } else if (mode === "edit" && initialData?.id) {
+        const dataToUpdate: UpdateTechnicianPayload = {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          zipCode: formData.zipCode,
+          city: formData.city,
+          state: formData.state,
+        };
+        await TechnicianService.updateTechnician(initialData.id, dataToUpdate);
+        onSuccess("TÉCNICO ATUALIZADO COM SUCESSO!");
+      }
+    } catch {
+      setError(`Falha ao ${mode === "add" ? "adicionar" : "atualizar"} técnico. Verifique os dados e tente novamente.`);
+      onSuccess(`Erro ao ${mode === "add" ? "adicionar" : "atualizar"} técnico!`);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  if (!isOpen) return null;
 
   return (
     <S.Overlay onClick={onClose}>
@@ -88,15 +107,18 @@ export const TechnicianModal: React.FC<ModalProps> = ({
           {mode === "add" ? "ADICIONAR TÉCNICO" : "EDITAR TÉCNICO"}
         </S.ModalHeader>
 
+        {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
+
         <S.FormGrid>
           <S.FormGroup>
             <label>Nome completo</label>
             <input
-              name="nome"
-              value={formData.nome}
+              name="fullName"
+              value={formData.fullName}
               onChange={handleChange}
               type="text"
               placeholder="Informe o nome"
+              disabled={isLoading}
             />
           </S.FormGroup>
           <S.FormGroup>
@@ -107,65 +129,72 @@ export const TechnicianModal: React.FC<ModalProps> = ({
               onChange={handleChange}
               type="email"
               placeholder="Informe o e-mail"
+              disabled={isLoading}
             />
           </S.FormGroup>
           <S.FormGroup>
             <label>Telefone</label>
             <input
-              name="telefone"
-              value={formData.telefone}
+              name="phone"
+              value={formData.phone}
               onChange={handleChange}
               type="text"
               placeholder="(00) 00000-0000"
               maxLength={15}
+              disabled={isLoading}
             />
           </S.FormGroup>
           <S.FormGroup>
             <label>CEP</label>
             <input
-              name="cep"
-              value={formData.cep}
+              name="zipCode"
+              value={formData.zipCode}
               onChange={handleChange}
               type="text"
               placeholder="00000-000"
               maxLength={9}
+              disabled={isLoading}
             />
           </S.FormGroup>
           <S.FormGroup>
             <label>Cidade</label>
             <input
-              name="cidade"
-              value={formData.cidade}
+              name="city"
+              value={formData.city}
               onChange={handleChange}
               type="text"
               placeholder="Informe a cidade"
+              disabled={isLoading}
             />
           </S.FormGroup>
           <S.FormGroup>
             <label>UF</label>
             <input
-              name="uf"
-              value={formData.uf}
+              name="state"
+              value={formData.state}
               onChange={handleChange}
               type="text"
               placeholder="UF"
               maxLength={2}
+              disabled={isLoading}
             />
           </S.FormGroup>
         </S.FormGrid>
 
         <S.ModalFooter>
           <AppButton
-            label="SALVAR"
+            label={isLoading ? "SALVANDO..." : "SALVAR"}
             background="#004687"
             color="#FFFFFF"
             onClick={handleSave}
+            disabled={isLoading}
           />
           <AppButton
             label="CANCELAR"
             background="#FFFFFF"
             color="#D9534F"
             onClick={onClose}
+            disabled={isLoading}
           />
         </S.ModalFooter>
       </S.ModalContainer>
