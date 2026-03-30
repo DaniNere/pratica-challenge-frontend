@@ -10,10 +10,10 @@ import {
   ErrorMessage,
 } from "./Login.styles";
 
-import { AppButton as Button } from "../../components/Button";
-import TextInputWhit from "../../components/TextInputWith";
-import PasswordInputWhit from "../../components/PasswordInputWhit";
-import PraticaBuildingBackground from "../../components/PraticaBuildingBackground";
+import { AppButton as Button } from "../../components/Button/Button";
+import TextInputWhit from "../../components/TextInputWith/TextInputWith";
+import PasswordInputWhit from "../../components/PasswordInputWhit/PasswordInputWhit";
+import PraticaBuildingBackground from "../../components/PraticaBuildingBackground/PraticaBuildingBackground";
 import MPS from "../../assets/MPS.svg";
 import { useNavigate } from "react-router-dom";
 
