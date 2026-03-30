@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -12,42 +12,44 @@ import { TechnicianModal } from "../../components/TechnicianModal/TechnicianModa
 import { ConfirmationModal } from "../../components/ConfirmationModal/ConfirmationModal";
 import { Toast } from "../../components/Toast/Toast";
 import type { Technician } from "../../types/technician";
-
-const techniciansData: Technician[] = [
-  {
-    id: 1,
-    nome: "Danielle Lima",
-    email: "danielle.lima@pratica.com",
-    telefone: "(11) 98888-7777",
-    cep: "01000-000",
-    cidade: "São Paulo",
-    uf: "SP",
-  },
-  {
-    id: 2,
-    nome: "João Silva",
-    email: "joao.silva@pratica.com",
-    telefone: "(11) 97777-6666",
-    cep: "09000-000",
-    cidade: "São Bernardo",
-    uf: "SP",
-  },
-];
+import { TechnicianService } from "../../services/TechnicianService";
 
 export default function TechniciansScreen() {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
 
-  
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
   const [toast, setToast] = useState({ open: false, message: "" });
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [selectedTech, setSelectedTech] = useState<Technician | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [techToDelete, setTechToDelete] = useState<Technician | null>(null);
+
+  const fetchTechnicians = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await TechnicianService.listAllTechnicians();
+      setTechnicians(data);
+    } catch {
+      setError(
+        "Não foi possível carregar os técnicos. Tente novamente mais tarde.",
+      );
+      setToast({ open: true, message: "Erro ao carregar técnicos!" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTechnicians();
+  }, []);
 
   const handleLogout = () => {
     signOut();
@@ -71,16 +73,48 @@ export default function TechniciansScreen() {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
-    setIsDeleteModalOpen(false);
-    setToast({ open: true, message: "TÉCNICO EXCLUÍDO COM SUCESSO!" });
-    setTechToDelete(null);
+  const confirmDelete = async () => {
+    if (techToDelete && techToDelete.id) {
+      try {
+        await TechnicianService.deleteTechnician(techToDelete.id);
+        setIsDeleteModalOpen(false);
+        setToast({ open: true, message: "TÉCNICO EXCLUÍDO COM SUCESSO!" });
+        setTechToDelete(null);
+        fetchTechnicians();
+      } catch {
+        setToast({ open: true, message: "Erro ao excluir técnico!" });
+      }
+    }
   };
 
   const handleSuccess = (message: string) => {
     setIsModalOpen(false);
     setToast({ open: true, message: message });
+    fetchTechnicians();
   };
+
+  
+  const filteredTechnicians = technicians.filter(
+    (tech) => {
+      const lowerCaseSearchTerm = searchTerm.toLowerCase();
+      if (!lowerCaseSearchTerm.trim()) {
+        return true;
+      }
+
+      
+      const isSearchTermNumeric = !isNaN(Number(searchTerm)) && searchTerm.trim() !== '';
+      const techIdAsString = tech.id ? tech.id.toString() : '';
+
+      return (
+        tech.fullName.toLowerCase().startsWith(lowerCaseSearchTerm) || 
+        tech.email.toLowerCase().startsWith(lowerCaseSearchTerm) ||    
+        tech.phone.startsWith(searchTerm) ||                           
+        tech.city.toLowerCase().startsWith(lowerCaseSearchTerm) ||     
+        tech.state.toLowerCase().startsWith(lowerCaseSearchTerm) ||    
+        (isSearchTermNumeric && techIdAsString.startsWith(lowerCaseSearchTerm)) 
+      );
+    }
+  );
 
   return (
     <>
@@ -124,7 +158,7 @@ export default function TechniciansScreen() {
             <S.TechniciansTable>
               <thead>
                 <tr>
-                  <th>Nome</th>
+                  <th>Nome Completo</th>
                   <th>E-mail</th>
                   <th>Telefone</th>
                   <th>Cidade</th>
@@ -133,35 +167,58 @@ export default function TechniciansScreen() {
                 </tr>
               </thead>
               <tbody>
-                {techniciansData.map((tech) => (
-                  <tr key={tech.id}>
-                    <td>{tech.nome}</td>
-                    <td>{tech.email}</td>
-                    <td>{tech.telefone}</td>
-                    <td>{tech.cidade}</td>
-                    <td>{tech.uf}</td>
-                    <td
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: "10px",
-                      }}
-                    >
-                      <S.IconButton
-                        title="Editar"
-                        onClick={() => handleEditClick(tech)}
-                      >
-                        <img src={editIcon} alt="Editar" />
-                      </S.IconButton>
-                      <S.IconButton
-                        title="Excluir"
-                        onClick={() => handleDeleteClick(tech)}
-                      >
-                        <img src={deleteIcon} alt="Excluir" />
-                      </S.IconButton>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: "center" }}>
+                      Carregando técnicos...
                     </td>
                   </tr>
-                ))}
+                ) : error ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      style={{ textAlign: "center", color: "red" }}
+                    >
+                      {error}
+                    </td>
+                  </tr>
+                ) : filteredTechnicians.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: "center" }}>
+                      Nenhum técnico encontrado.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredTechnicians.map((tech) => (
+                    <tr key={tech.id}>
+                      <td>{tech.fullName}</td>
+                      <td>{tech.email}</td>
+                      <td>{tech.phone}</td>
+                      <td>{tech.city}</td>
+                      <td>{tech.state}</td>
+                      <td
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          gap: "10px",
+                        }}
+                      >
+                        <S.IconButton
+                          title="Editar"
+                          onClick={() => handleEditClick(tech)}
+                        >
+                          <img src={editIcon} alt="Editar" />
+                        </S.IconButton>
+                        <S.IconButton
+                          title="Excluir"
+                          onClick={() => handleDeleteClick(tech)}
+                        >
+                          <img src={deleteIcon} alt="Excluir" />
+                        </S.IconButton>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </S.TechniciansTable>
           </S.ContentPadding>
