@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
@@ -13,16 +13,16 @@ import { ConfirmationModal } from "../../components/ConfirmationModal/Confirmati
 import { Toast } from "../../components/Toast/Toast";
 import type { Technician } from "../../types/technician";
 import { TechnicianService } from "../../services/TechnicianService";
+import { ChevronLeft } from "lucide-react";
 
 export default function TechniciansScreen() {
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [isMinimized, setIsMinimized] = useState(false);
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
@@ -38,9 +38,7 @@ export default function TechniciansScreen() {
       const data = await TechnicianService.listAllTechnicians();
       setTechnicians(data);
     } catch {
-      setError(
-        "Não foi possível carregar os técnicos. Tente novamente mais tarde.",
-      );
+      setError("Não foi possível carregar os técnicos. Tente novamente mais tarde.");
       setToast({ open: true, message: "Erro ao carregar técnicos!" });
     } finally {
       setIsLoading(false);
@@ -93,49 +91,43 @@ export default function TechniciansScreen() {
     fetchTechnicians();
   };
 
-  
-  const filteredTechnicians = technicians.filter(
-    (tech) => {
-      const lowerCaseSearchTerm = searchTerm.toLowerCase();
-      if (!lowerCaseSearchTerm.trim()) {
-        return true;
-      }
-
-      
-      const isSearchTermNumeric = !isNaN(Number(searchTerm)) && searchTerm.trim() !== '';
-      const techIdAsString = tech.id ? tech.id.toString() : '';
-
-      return (
-        tech.fullName.toLowerCase().startsWith(lowerCaseSearchTerm) || 
-        tech.email.toLowerCase().startsWith(lowerCaseSearchTerm) ||    
-        tech.phone.startsWith(searchTerm) ||                           
-        tech.city.toLowerCase().startsWith(lowerCaseSearchTerm) ||     
-        tech.state.toLowerCase().startsWith(lowerCaseSearchTerm) ||    
-        (isSearchTermNumeric && techIdAsString.startsWith(lowerCaseSearchTerm)) 
-      );
-    }
-  );
+  const filteredTechnicians = useMemo(() => technicians.filter((tech) => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    if (!lowerCaseSearchTerm.trim()) return true;
+    const isSearchTermNumeric = !isNaN(Number(searchTerm)) && searchTerm.trim() !== '';
+    const techIdAsString = tech.id ? tech.id.toString() : '';
+    return (
+      tech.fullName.toLowerCase().startsWith(lowerCaseSearchTerm) || 
+      tech.email.toLowerCase().startsWith(lowerCaseSearchTerm) ||    
+      tech.phone.startsWith(searchTerm) ||                           
+      tech.city.toLowerCase().startsWith(lowerCaseSearchTerm) ||     
+      tech.state.toLowerCase().startsWith(lowerCaseSearchTerm) ||    
+      (isSearchTermNumeric && techIdAsString.startsWith(lowerCaseSearchTerm)) 
+    );
+  }), [technicians, searchTerm]);
 
   return (
     <>
       <S.ScreenContainer
-        $isBlur={
-          isModalOpen || isDeleteModalOpen || isCancelConfirmOpen || toast.open
-        }
+        $isBlur={isModalOpen || isDeleteModalOpen || isCancelConfirmOpen || toast.open}
       >
-        <S.Sidebar>
-          <S.LogoWrapper>
+        <S.Sidebar $minimized={isMinimized}>
+          <S.ToggleButton 
+            $minimized={isMinimized} 
+            onClick={() => setIsMinimized(!isMinimized)}
+          >
+            <ChevronLeft size={20} />
+          </S.ToggleButton>
+          <S.LogoWrapper $minimized={isMinimized}>
             <img src={logoWhite} alt="Logo" />
           </S.LogoWrapper>
-          <S.MenuItem $active>
+          <S.MenuItem $active $minimized={isMinimized}>
             <img src={tecnicoIcon} alt="Ícone" />
             <span>TÉCNICOS</span>
           </S.MenuItem>
         </S.Sidebar>
-
         <S.MainArea>
           <Header onLogout={handleLogout} />
-
           <S.ContentPadding>
             <S.ActionBar>
               <S.SearchInput>
@@ -155,6 +147,7 @@ export default function TechniciansScreen() {
                 onClick={handleAddClick}
               />
             </S.ActionBar>
+
             <S.TechniciansTable>
               <thead>
                 <tr>
@@ -168,26 +161,11 @@ export default function TechniciansScreen() {
               </thead>
               <tbody>
                 {isLoading ? (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: "center" }}>
-                      Carregando técnicos...
-                    </td>
-                  </tr>
+                  <tr><td colSpan={6} style={{ textAlign: "center" }}>Carregando técnicos...</td></tr>
                 ) : error ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      style={{ textAlign: "center", color: "red" }}
-                    >
-                      {error}
-                    </td>
-                  </tr>
+                  <tr><td colSpan={6} style={{ textAlign: "center", color: "red" }}>{error}</td></tr>
                 ) : filteredTechnicians.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} style={{ textAlign: "center" }}>
-                      Nenhum técnico encontrado.
-                    </td>
-                  </tr>
+                  <tr><td colSpan={6} style={{ textAlign: "center" }}>Nenhum técnico encontrado.</td></tr>
                 ) : (
                   filteredTechnicians.map((tech) => (
                     <tr key={tech.id}>
@@ -196,23 +174,11 @@ export default function TechniciansScreen() {
                       <td>{tech.phone}</td>
                       <td>{tech.city}</td>
                       <td>{tech.state}</td>
-                      <td
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          gap: "10px",
-                        }}
-                      >
-                        <S.IconButton
-                          title="Editar"
-                          onClick={() => handleEditClick(tech)}
-                        >
+                      <td style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+                        <S.IconButton title="Editar" onClick={() => handleEditClick(tech)}>
                           <img src={editIcon} alt="Editar" />
                         </S.IconButton>
-                        <S.IconButton
-                          title="Excluir"
-                          onClick={() => handleDeleteClick(tech)}
-                        >
+                        <S.IconButton title="Excluir" onClick={() => handleDeleteClick(tech)}>
                           <img src={deleteIcon} alt="Excluir" />
                         </S.IconButton>
                       </td>
@@ -224,6 +190,7 @@ export default function TechniciansScreen() {
           </S.ContentPadding>
         </S.MainArea>
       </S.ScreenContainer>
+
       <TechnicianModal
         isOpen={isModalOpen}
         onClose={() => setIsCancelConfirmOpen(true)}

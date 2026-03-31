@@ -40,8 +40,8 @@ export const InputField = styled.input`
   border: 1px solid #e0e0e0;
   border-radius: 6px;
   font-family: "Roboto", sans-serif;
-  font-size: 14px;
-  color: #003c7a;
+  font-size: 12px;
+  color: #333333;
   padding: 0 16px;
   box-sizing: border-box;
   opacity: 1;
@@ -64,7 +64,6 @@ export const InputField = styled.input`
     opacity: 0.6;
   }
 
-  /* Autofill (Chrome) */
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus {

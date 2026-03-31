@@ -31,7 +31,7 @@ export const TogglePasswordButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  color: #C9C9C9;
   transition: color 0.2s ease;
 
   &:hover:not(:disabled) {
