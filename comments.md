@@ -39,4 +39,13 @@
 - [X] Tratamento de Erros da API: Exibir Toasts de erro caso a conexão com o banco Azure SQL falhe ou o e-mail já exista.
 - Ficou excelente a estrutura! Esse documento ajuda muito a provar a senioridade do seu código no desafio. Algo mais que queira incluir antes de fecharmos essa parte?
 
-31-03 Ajustes finos do layout verificação de estabilidade do sistema
+
+## 📌 Progresso do Desafio (Frontend) 31-03
+- [x] Refinamento de UI/UX (Fidelidade Extrema):
+- [x] Sidebar Adaptativa: Implementação da lógica de minimização/recolhimento com transições suaves (0.3s).
+- [x] Preservação de Layout: Ajuste no LogoWrapper e MenuItem para evitar o deslocamento vertical (pulo) de componentes ao ocultar elementos.
+- [x] Interatividade Avançada: Criação de ToggleButton flutuante com efeito de fade-in inteligente via seletor de hover na Sidebar.
+- [x] Matriz de Transformação CSS: Aplicação de matrix() e rotate() para garantir que a iconografia siga exatamente o comportamento de rotação previsto no Adobe XD.
+- [x] Sincronização de estados de hover entre o container pai (Sidebar) e elementos filhos (Botão de controle).
+- [x] Validação dos campos obrigatórios no CREATE e UPDATE de técnico
+
