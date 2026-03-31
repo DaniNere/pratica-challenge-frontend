@@ -22,54 +22,86 @@ export const TechnicianModal: React.FC<ModalProps> = ({
     city: "",
     state: "",
   });
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen && mode === "edit" && initialData) {
-      setFormData({
-        fullName: initialData.fullName,
-        email: initialData.email,
-        phone: initialData.phone,
-        zipCode: initialData.zipCode,
-        city: initialData.city,
-        state: initialData.state,
-      });
-    } else if (isOpen && mode === "add") {
-      setFormData({
-        fullName: "",
-        email: "",
-        phone: "",
-        zipCode: "",
-        city: "",
-        state: "",
-      });
+    if (isOpen) {
+      setFieldErrors({});
+      if (mode === "edit" && initialData) {
+        setFormData({
+          fullName: initialData.fullName,
+          email: initialData.email,
+          phone: initialData.phone,
+          zipCode: initialData.zipCode,
+          city: initialData.city,
+          state: initialData.state,
+        });
+      } else {
+        setFormData({
+          fullName: "",
+          email: "",
+          phone: "",
+          zipCode: "",
+          city: "",
+          state: "",
+        });
+      }
     }
     setError(null);
-    setIsLoading(false);
   }, [isOpen, mode, initialData]);
 
-  const formatCEP = (value: string) =>
-    value
-      .replace(/\D/g, "")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .substring(0, 9);
-  const formatPhone = (value: string) =>
-    value
-      .replace(/\D/g, "")
-      .replace(/(\d{2})(\d)/, "($1) $2")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .substring(0, 15);
+  const validateEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let formattedValue = value;
-    if (name === "zipCode") formattedValue = formatCEP(value);
-    else if (name === "phone") formattedValue = formatPhone(value);
+
+    if (name === "zipCode") {
+      formattedValue = value
+        .replace(/\D/g, "")
+        .replace(/(\d{5})(\d)/, "$1-$2")
+        .substring(0, 9);
+    } else if (name === "phone") {
+      formattedValue = value
+        .replace(/\D/g, "")
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{5})(\d)/, "$1-$2")
+        .substring(0, 15);
+    } else if (name === "state") {
+      formattedValue = value
+        .replace(/[^a-zA-Z]/g, "")
+        .toUpperCase()
+        .substring(0, 2);
+    }
+
     setFormData((prev) => ({ ...prev, [name]: formattedValue }));
+    if (fieldErrors[name]) setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    if (formData.fullName.trim().length < 3)
+      errors.fullName = "Nome obrigatório";
+    if (!validateEmail(formData.email)) errors.email = "E-mail inválido";
+    if (formData.phone.length < 14) errors.phone = "Telefone inválido";
+    if (formData.zipCode.length !== 9) errors.zipCode = "CEP inválido";
+    if (!formData.city.trim()) errors.city = "Cidade obrigatória";
+    if (formData.state.length !== 2) errors.state = "UF inválida";
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSave = async () => {
+    if (!validateForm()) {
+      setError("Existem erros nos campos obrigatórios.");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -90,18 +122,22 @@ export const TechnicianModal: React.FC<ModalProps> = ({
         onSuccess("TÉCNICO ATUALIZADO COM SUCESSO!");
       }
     } catch {
-      setError(
-        `Falha ao ${mode === "add" ? "adicionar" : "atualizar"} técnico. Verifique os dados e tente novamente.`,
-      );
-      onSuccess(
-        `Erro ao ${mode === "add" ? "adicionar" : "atualizar"} técnico!`,
-      );
+      setError("Falha ao salvar técnico. Tente novamente.");
     } finally {
       setIsLoading(false);
     }
   };
 
   if (!isOpen) return null;
+
+  const fields = [
+    { label: "Nome completo", name: "fullName", placeholder: "Informe o nome" },
+    { label: "E-mail", name: "email", placeholder: "Informe o e-mail" },
+    { label: "Telefone", name: "phone", placeholder: "(00) 0 0000-0000" },
+    { label: "CEP", name: "zipCode", placeholder: "00000-000" },
+    { label: "Cidade", name: "city", placeholder: "Informe a cidade" },
+    { label: "UF", name: "state", placeholder: "MG" },
+  ];
 
   return (
     <S.Overlay onClick={onClose}>
@@ -110,86 +146,49 @@ export const TechnicianModal: React.FC<ModalProps> = ({
           {mode === "add" ? "ADICIONAR TÉCNICO" : "EDITAR TÉCNICO"}
         </S.ModalHeader>
 
-        {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
+        {error && (
+          <p
+            style={{
+              color: "#D9534F",
+              textAlign: "center",
+              fontSize: "12px",
+              marginTop: "10px",
+            }}
+          >
+            {error}
+          </p>
+        )}
 
         <S.FormGrid>
-          <S.FormGroup>
-            <label>Nome completo</label>
-            <input
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              type="text"
-              placeholder="Informe o nome"
-              disabled={isLoading}
-            />
-          </S.FormGroup>
-          <S.FormGroup>
-            <label>E-mail</label>
-            <input
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              type="email"
-              placeholder="Informe o e-mail"
-              disabled={isLoading}
-            />
-          </S.FormGroup>
-          <S.FormGroup>
-            <label>Telefone</label>
-            <input
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              type="text"
-              placeholder="(00) 00000-0000"
-              maxLength={15}
-              disabled={isLoading}
-            />
-          </S.FormGroup>
-          <S.FormGroup>
-            <label>CEP</label>
-            <input
-              name="zipCode"
-              value={formData.zipCode}
-              onChange={handleChange}
-              type="text"
-              placeholder="00000-000"
-              maxLength={9}
-              disabled={isLoading}
-            />
-          </S.FormGroup>
-          <S.FormGroup>
-            <label>Cidade</label>
-            <input
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              type="text"
-              placeholder="Informe a cidade"
-              disabled={isLoading}
-            />
-          </S.FormGroup>
-          <S.FormGroup>
-            <label>UF</label>
-            <input
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              type="text"
-              placeholder="UF"
-              maxLength={2}
-              disabled={isLoading}
-            />
-          </S.FormGroup>
+          {fields.map((f) => {
+            const fieldName = f.name as keyof CreateTechnicianPayload;            
+            return (
+              <S.FormGroup key={f.name}>
+                <label>{f.label}</label>
+                <input
+                  name={f.name}
+                  value={formData[fieldName]}
+                  onChange={handleChange}
+                  placeholder={f.placeholder}
+                  style={{
+                    borderColor: fieldErrors[f.name] ? "#D9534F" : "#ddd",
+                  }}
+                />
+                {fieldErrors[f.name] && (
+                  <span style={{ color: "#D9534F", fontSize: "10px" }}>
+                    {fieldErrors[f.name]}
+                  </span>
+                )}
+              </S.FormGroup>
+            );
+          })}
         </S.FormGrid>
+
         <S.ModalFooter>
-          <S.SaveButton type="button" onClick={handleSave} disabled={isLoading}>
-            {isLoading ? "SALVANDO..." : "SALVAR"}
+          <S.SaveButton onClick={handleSave} disabled={isLoading}>
+            SALVAR
           </S.SaveButton>
-          <S.CancelButton type="button" onClick={onClose} disabled={isLoading}>
-            CANCELAR
-          </S.CancelButton>
+          <S.CancelButton onClick={onClose}>CANCELAR</S.CancelButton>
         </S.ModalFooter>
       </S.ModalContainer>
     </S.Overlay>
