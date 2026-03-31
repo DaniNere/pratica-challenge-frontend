@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
 import * as S from "./TechnicianModal.styles";
 import { TechnicianService } from "../../services/TechnicianService";
+import { 
+  formatCEP, 
+  formatPhone, 
+  formatUF, 
+  validateEmail 
+} from "../../helpers/formatters";
 import type {
   CreateTechnicianPayload,
   ModalProps,
@@ -53,39 +59,27 @@ export const TechnicianModal: React.FC<ModalProps> = ({
     setError(null);
   }, [isOpen, mode, initialData]);
 
-  const validateEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let formattedValue = value;
 
-    if (name === "zipCode") {
-      formattedValue = value
-        .replace(/\D/g, "")
-        .replace(/(\d{5})(\d)/, "$1-$2")
-        .substring(0, 9);
-    } else if (name === "phone") {
-      formattedValue = value
-        .replace(/\D/g, "")
-        .replace(/(\d{2})(\d)/, "($1) $2")
-        .replace(/(\d{5})(\d)/, "$1-$2")
-        .substring(0, 15);
-    } else if (name === "state") {
-      formattedValue = value
-        .replace(/[^a-zA-Z]/g, "")
-        .toUpperCase()
-        .substring(0, 2);
-    }
+    // Aplicação das máscaras via helpers (conforme página 3 do PDF)
+    if (name === "zipCode") formattedValue = formatCEP(value);
+    else if (name === "phone") formattedValue = formatPhone(value);
+    else if (name === "state") formattedValue = formatUF(value);
 
     setFormData((prev) => ({ ...prev, [name]: formattedValue }));
-    if (fieldErrors[name]) setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+
+    // Limpa erro visual ao digitar
+    if (fieldErrors[name]) {
+      setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
-    if (formData.fullName.trim().length < 3)
-      errors.fullName = "Nome obrigatório";
+
+    if (formData.fullName.trim().length < 3) errors.fullName = "Nome obrigatório";
     if (!validateEmail(formData.email)) errors.email = "E-mail inválido";
     if (formData.phone.length < 14) errors.phone = "Telefone inválido";
     if (formData.zipCode.length !== 9) errors.zipCode = "CEP inválido";
@@ -147,14 +141,7 @@ export const TechnicianModal: React.FC<ModalProps> = ({
         </S.ModalHeader>
 
         {error && (
-          <p
-            style={{
-              color: "#D9534F",
-              textAlign: "center",
-              fontSize: "12px",
-              marginTop: "10px",
-            }}
-          >
+          <p style={{ color: "#D9534F", textAlign: "center", fontSize: "12px", marginTop: "10px" }}>
             {error}
           </p>
         )}
