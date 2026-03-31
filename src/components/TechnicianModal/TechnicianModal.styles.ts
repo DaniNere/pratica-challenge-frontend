@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+
 export const Overlay = styled.div`
   position: fixed;
   top: 0;
@@ -14,7 +15,7 @@ export const Overlay = styled.div`
 `;
 
 export const ModalContainer = styled.div`
-  width: 600px; /* Cadastro é maior */
+  width: 600px;
   background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.3);
@@ -72,4 +73,55 @@ export const ModalFooter = styled.div`
   justify-content: center;
   gap: 15px;
   padding-bottom: 30px;
+`;
+export const SaveButton = styled.button`
+  width: 108px;
+  height: 38px;
+  background-color: #396BC9;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.2s;
+
+  &:hover {
+    filter: brightness(0.9);
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+`;
+
+export const CancelButton = styled.button`
+  width: 108px;
+  height: 38px;
+  background-color: #FFFFFF;
+  color: #D9534F;
+  border: 1px solid #D9534F;
+  border-radius: 6px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #FFF5F5;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;

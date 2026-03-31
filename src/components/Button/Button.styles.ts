@@ -11,10 +11,11 @@ export const Button = styled.button<{ $bg?: string; $clr?: string; $variant?: st
   border-radius: 6px;
   font-family: "Roboto", sans-serif;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s ease;
+  
 
   &:active:not(:disabled) {
     transform: scale(0.96);

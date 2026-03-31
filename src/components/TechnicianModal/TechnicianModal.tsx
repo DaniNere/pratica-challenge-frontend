@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import * as S from "./TechnicianModal.styles";
-import { AppButton } from "../../components/Button/Button";
 import { TechnicianService } from "../../services/TechnicianService";
 import type {
   CreateTechnicianPayload,
@@ -91,8 +90,12 @@ export const TechnicianModal: React.FC<ModalProps> = ({
         onSuccess("TÉCNICO ATUALIZADO COM SUCESSO!");
       }
     } catch {
-      setError(`Falha ao ${mode === "add" ? "adicionar" : "atualizar"} técnico. Verifique os dados e tente novamente.`);
-      onSuccess(`Erro ao ${mode === "add" ? "adicionar" : "atualizar"} técnico!`);
+      setError(
+        `Falha ao ${mode === "add" ? "adicionar" : "atualizar"} técnico. Verifique os dados e tente novamente.`,
+      );
+      onSuccess(
+        `Erro ao ${mode === "add" ? "adicionar" : "atualizar"} técnico!`,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -180,22 +183,13 @@ export const TechnicianModal: React.FC<ModalProps> = ({
             />
           </S.FormGroup>
         </S.FormGrid>
-
         <S.ModalFooter>
-          <AppButton
-            label={isLoading ? "SALVANDO..." : "SALVAR"}
-            background="#004687"
-            color="#FFFFFF"
-            onClick={handleSave}
-            disabled={isLoading}
-          />
-          <AppButton
-            label="CANCELAR"
-            background="#FFFFFF"
-            color="#D9534F"
-            onClick={onClose}
-            disabled={isLoading}
-          />
+          <S.SaveButton type="button" onClick={handleSave} disabled={isLoading}>
+            {isLoading ? "SALVANDO..." : "SALVAR"}
+          </S.SaveButton>
+          <S.CancelButton type="button" onClick={onClose} disabled={isLoading}>
+            CANCELAR
+          </S.CancelButton>
         </S.ModalFooter>
       </S.ModalContainer>
     </S.Overlay>

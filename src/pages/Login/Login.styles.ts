@@ -1,17 +1,5 @@
 import styled from "styled-components";
 
-/**
- * Login Styles
- *
- * Layout: Split screen design
- * - Left: institutional blue form panel (#004687), 660px de largura, sombra
- * - Right: facade image panel, 746px de largura, borda cinza
- *
- * Responsiveness:
- * - Desktop (~≥1366px): 660px + 746px (layout idêntico ao protótipo)
- * - Entre 900px e 1366px: painéis se adaptam (flex)
- * - Mobile (<900px): mostra só o painel azul (form); esconde fachada
- */
 
 export const LoginContainer = styled.div`
   display: flex;
@@ -43,7 +31,7 @@ export const LeftPanel = styled.div`
 `;
 
 export const RightPanel = styled.div`
-  width: 746px; 
+  flex: 1; /* Isso faz ele ocupar todo o espaço restante, eliminando a faixa preta */
   height: 100vh;
   position: relative;
   z-index: 1;
@@ -95,26 +83,23 @@ export const LogoWrapper = styled.div`
 
 export const FormWrapper = styled.div`
   width: 100%;
-  max-width: 580px;
+  max-width: 580px; 
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
+  justify-content: center;
   padding: 0 40px;
-  padding-top: 100px; 
-  padding-bottom: 40px;
-
 
   form {
     display: flex;
     flex-direction: column;
-    //gap: 21px;
+    align-items: center;
+    width: 100%;
+    gap: 10px;
   }
 
   @media (max-width: 900px) {
-    max-width: 100%;
-    padding: 24px;
-    padding-top: 32px; 
-    padding-bottom: 32px;
-  }
+    padding: 24px; }
+
 `;
 
 export const ErrorMessage = styled.div`

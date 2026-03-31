@@ -13,14 +13,9 @@ interface PasswordInputWhitProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   required?: boolean;
-  isLast?: boolean; // Adiciona isLast para controlar a margem final
+  isLast?: boolean; 
 }
 
-/**
- * PasswordInputWhit Component
- * Reusable password input field with a toggle visibility icon.
- * Encapsulates TextInputWhit and the show/hide password functionality.
- */
 export default function PasswordInputWhit({
   id,
   label,
@@ -29,7 +24,7 @@ export default function PasswordInputWhit({
   onChange,
   disabled = false,
   required = false,
-  isLast = false, // Nova prop para controlar a margem final
+  isLast = false,
 }: PasswordInputWhitProps) {
   const [showPassword, setShowPassword] = useState(false);
 
