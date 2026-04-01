@@ -63,14 +63,13 @@ export const TechnicianModal: React.FC<ModalProps> = ({
     const { name, value } = e.target;
     let formattedValue = value;
 
-    // Aplicação das máscaras via helpers (conforme página 3 do PDF)
     if (name === "zipCode") formattedValue = formatCEP(value);
     else if (name === "phone") formattedValue = formatPhone(value);
     else if (name === "state") formattedValue = formatUF(value);
 
     setFormData((prev) => ({ ...prev, [name]: formattedValue }));
 
-    // Limpa erro visual ao digitar
+    
     if (fieldErrors[name]) {
       setFieldErrors((prev) => ({ ...prev, [name]: "" }));
     }

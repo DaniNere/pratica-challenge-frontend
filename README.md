@@ -46,16 +46,15 @@ A estrutura do projeto foi pensada para escalabilidade e separação de responsa
 
 ```bash
 src/
- ├── api/           # Configuração do Axios e instância da API
- ├── assets/        # Imagens e ícones SVG
- ├── components/    # Componentes globais reutilizáveis
- ├── contexts/      # Contextos da aplicação (Auth)
- ├── hooks/         # Hooks customizados
- ├── pages/         # Telas principais (Login, Technicians)
- ├── routes/        # Configuração de rotas e rotas privadas
- ├── services/      # Integração com API (Axios)
- ├── styles/        # Estilos globais e temas
- └── types/         # Definições de interfaces TypeScript
+ ├── api/           
+ ├── assets/        
+ ├── components/    
+ ├── contexts/      
+ ├── hooks/         
+ ├── pages/         
+ ├── routes/        
+ ├── services/            
+ └── types/         
 ```
 
 ---
@@ -90,6 +89,7 @@ src/
 - `npm run build`: Gera a build de produção na pasta `dist/`.
 - `npm run preview`: Pré-visualiza a build de produção localmente.
 - `npm run lint`: Executa a verificação do ESLint para garantir a qualidade do código.
+- `npm run test`: Executa testes unitários.
 
 ---
 
@@ -98,5 +98,3 @@ src/
 Desenvolvido por **Danielle Nere** – LinkedIn | GitHub
 
 ---
-
-EOF
