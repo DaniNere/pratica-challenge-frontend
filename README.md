@@ -8,7 +8,7 @@ Este projeto é o frontend de uma plataforma de gestão de técnicos parceiros d
 
 - **Gestão de Autenticação:** Sistema de login seguro com persistência de token JWT via `localStorage` e rotas protegidas.
 - **CRUD Completo de Técnicos:** Listagem, criação, edição e exclusão (soft delete) de técnicos.
-- **Busca em Tempo Real:** Filtro inteligente na listagem por nome, e-mail, telefone, cidade, estado ou ID (otimizado com `useMemo`).
+- **Busca em Tempo Real:** Filtro inteligente na listagem por nome.
 - **Interface Responsiva:** Layout adaptável para resoluções desktop (foco em 1366x768 conforme protótipo) e mobile.
 - **Experiência do Usuário (UX):**
   - Máscaras dinâmicas para campos de Telefone e CEP.
